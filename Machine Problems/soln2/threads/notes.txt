@@ -1,0 +1,35 @@
+t thread_create():
+    - allocate new thread struct
+    - allocate stack frame
+    - return thread object
+
+void thread_add_runqueue(t):
+    - add to queue
+
+void schedule:
+    - set current_thread to current_thread->next
+
+void dispatch:
+    - save old state (setjmp) if we return from longjmp, return
+    - if current thread was run before, longjmp
+    - if it was not run before, init stack pointer and base pointer
+		__asm__ __volatile__("mov %%rax,%%rsp"
+									:
+									:"a"(current_thread->stack_end));
+		__asm__ __volatile__("mov %%rax,%%rbp"
+									:
+									:"a"(current_thread->stack_end));
+    - call thread function
+    - call thread exit
+
+thread_yeild:
+    - schedule + dispatch
+
+thread_start_threading:
+    - save context (setjmp(main_env)), exit if we return from setjmp
+    - call dispatch otherwise
+
+thread_exit:
+    - update queue, free stack and thread struct
+    - if threads left, call dispatch
+    - otherwise longjmp(main_env)
